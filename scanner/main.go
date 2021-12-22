@@ -168,6 +168,9 @@ func advHandler(a ble.Advertisement) {
 			int_part = int(sd.Data[4]) << 8 
 			fract_part = int(sd.Data[5])
 			temperature = float32(int_part + fract_part)/256
+			if(temperature>200){
+				temperature=temperature-256.0;
+			}
 			fmt.Printf("Temperature: %f\n", temperature)
 			if(len(sd.Data)>14){
 				int_part = int(sd.Data[14]) << 8 
