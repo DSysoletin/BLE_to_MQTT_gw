@@ -1,0 +1,12 @@
+#!/sbin/openrc-run
+command="/root/BLE_to_MQTT_gw/scanner/scanner.sh"
+command_background=true
+pidfile="/run/ble_scanner_openrc.pid"
+
+name="BLE to MQTT gateway control script"
+description="This script controls running of BLE to MQTT gateway. That gateway scans for Eddystone TLM beacons and forwards data to the MQTT broker"
+
+stop_post(){
+	killall -s 9 scanner
+	killall -s 9 scanner.sh
+}

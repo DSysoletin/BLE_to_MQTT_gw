@@ -157,14 +157,15 @@ func advHandler(a ble.Advertisement) {
 	var fract_part int
 	var sd ble.ServiceData
 
-	fmt.Println("\n--------------------")
+	//fmt.Println("\n--------------------")
 	//fmt.Printf("%+X\n", a)
 	servData:=a.ServiceData()
 
 	if(len(servData)>0){
 		sd=servData[0]
-		fmt.Printf("Service data length: %d \n",len(sd.Data))
+		//fmt.Printf("Service data length: %d \n",len(sd.Data))
 		if len(sd.Data) == 16 {
+			fmt.Println("\n--------------------")
 			int_part = int(sd.Data[4]) << 8 
 			fract_part = int(sd.Data[5])
 			temperature = float32(int_part + fract_part)/256
@@ -191,8 +192,6 @@ func advHandler(a ble.Advertisement) {
 				humidity,
 				voltage,
 			}
-
-
 			cdata<-data
 		}
 	}
@@ -200,10 +199,10 @@ func advHandler(a ble.Advertisement) {
 
 	//fmt.Println(a)
 	//fmt.Printf("Underlying Type: %T\n", a)
-    fmt.Printf("Underlying Value: %v\n", a)
+    //fmt.Printf("Underlying Value: %v\n", a)
 
 
-	if a.Connectable() {
+	/*if a.Connectable() {
 		fmt.Printf("[%s] C %3d:", a.Addr(), a.RSSI())
 	} else {
 		fmt.Printf("[%s] N %3d:", a.Addr(), a.RSSI())
@@ -219,7 +218,7 @@ func advHandler(a ble.Advertisement) {
 	}
 	if len(a.ManufacturerData()) > 0 {
 		fmt.Printf("%s MD: %X", comma, a.ManufacturerData())
-	}
+	}*/
 	/*fmt.Printf(" Adv manufdata Len: %d ",len(a.ManufacturerData()))
 	fmt.Printf(" Adv ServiceData Len: %d ",len(a.ServiceData()))
 	fmt.Printf("\n")*/

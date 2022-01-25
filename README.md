@@ -23,3 +23,12 @@ Publishing...
 30:83:98:00:3c:2a/voltage
 
 In this example, you can see the topics used for publishing the sensor data. Because topics include HW address of the sensor, several sensors can be used with one scanner app.
+
+AUTOSTART (Gentoo only)
+
+I've created a script for autostart the BLE scanner via OpenRC.
+To use it, just copy "gentoo_init_script/ble_scanner" to "/etc/init.d" directory.
+Please make sure that you clonned repo in your root folder (ls /root/BLE_to_MQTT_gw/scanner/scanner should show valid application), OR edit the ble_scanner and scanner.sh scritps and replace paths to your actual ones.
+And please make sure that scanner binary, scanner.sh and ble_scanner files have +x flag
+
+After that, you can start and stop the scanner with /etc/init.d/ble_scanner start(or stop)
