@@ -35,6 +35,7 @@ type sensorData struct {
 	temperature float32
 	humidity float32
 	voltage int
+	light int
 }
 
 var cdata = make(chan sensorData)
@@ -121,6 +122,13 @@ func mqttConnect(){
                 log.Fatal(token.Error())
         }
 
+        topic=fmt.Sprintf("%s/light",data.macAddr)
+        fmt.Println(topic)
+		token = mqttClient.Publish(topic,0,false,fmt.Sprintf("%d",data.light))
+		if token.Error() != nil {
+                log.Fatal(token.Error())
+        }
+
         }
 	}()
 	<-quit
@@ -155,16 +163,17 @@ func advHandler(a ble.Advertisement) {
 	var voltage int
 	var int_part int
 	var fract_part int
+	var light int
 	var sd ble.ServiceData
 
 	//fmt.Println("\n--------------------")
 	//fmt.Printf("%+X\n", a)
 	servData:=a.ServiceData()
-
+	light=0
 	if(len(servData)>0){
 		sd=servData[0]
 		//fmt.Printf("Service data length: %d \n",len(sd.Data))
-		if len(sd.Data) == 16 {
+		if (len(sd.Data) == 16) || (len(sd.Data) == 18) {
 			fmt.Println("\n--------------------")
 			int_part = int(sd.Data[4]) << 8 
 			fract_part = int(sd.Data[5])
@@ -173,6 +182,7 @@ func advHandler(a ble.Advertisement) {
 				temperature=temperature-256.0;
 			}
 			fmt.Printf("Temperature: %f\n", temperature)
+			
 			if(len(sd.Data)>14){
 				int_part = int(sd.Data[14]) << 8 
 				fract_part = int(sd.Data[15])
@@ -186,11 +196,19 @@ func advHandler(a ble.Advertisement) {
 			voltage += int(sd.Data[3])
 			fmt.Printf("Voltage: %d\n", voltage)
 
+			//light(optional)
+			if (len(sd.Data) == 18) {
+				light = int(sd.Data[16]) << 8
+				light += int(sd.Data[17])
+				fmt.Printf("Light: %d\n", light)
+			}
+
 			data:=sensorData{
 				fmt.Sprintf("%s",a.Addr()),
 				temperature,
 				humidity,
 				voltage,
+				light,
 			}
 			cdata<-data
 		}
