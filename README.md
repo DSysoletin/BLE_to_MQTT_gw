@@ -32,3 +32,21 @@ Please make sure that you clonned repo in your root folder (ls /root/BLE_to_MQTT
 And please make sure that scanner binary, scanner.sh and ble_scanner files have +x flag
 
 After that, you can start and stop the scanner with /etc/init.d/ble_scanner start(or stop)
+
+AUTOSTART (systemd-based distros)
+
+Please edit ble_scanner.service file with actual path to the scanner binary on your system. Then copy ble_scanner.serivce to /lib/systemd/system, and run the following commands:
+#systemctl daemon-reload
+#systemctl enable start ble_scanner
+#systemctl start ble_scanner
+#systemctl status ble_scanner
+
+You should see something like this:
+● ble_scanner.service - BLE to MQTT gateway. Listens to Eddystone TLM beacons and sends their content to the MQTT server.
+     Loaded: loaded (/lib/systemd/system/ble_scanner.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sat 2023-02-25 16:12:48 CET; 2s ago
+   Main PID: 493905 (scanner)
+      Tasks: 10 (limit: 8986)
+        CPU: 30ms
+     CGroup: /system.slice/ble_scanner.service
+             └─493905 /home/ai/2022_07_27_BLE_to_MQTT_gw/scanner/scanner -host 127.0.0.1 -port 1883

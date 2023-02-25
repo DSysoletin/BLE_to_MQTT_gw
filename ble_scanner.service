@@ -1,0 +1,11 @@
+[Unit]
+Description=BLE to MQTT gateway. Listens to Eddystone TLM beacons and sends their content to the MQTT server.
+After=bluetooth.service
+Restart=always
+RestartSec=5
+
+[Service]
+ExecStart=<YOURPATH>/scanner -host 127.0.0.1 -port 1883
+
+[Install]
+WantedBy=multi-user.target
