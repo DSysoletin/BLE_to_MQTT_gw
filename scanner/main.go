@@ -36,6 +36,7 @@ type sensorData struct {
 	humidity float32
 	voltage int
 	light int
+	rssi int
 }
 
 var cdata = make(chan sensorData)
@@ -129,6 +130,13 @@ func mqttConnect(){
                 log.Fatal(token.Error())
         }
 
+        topic=fmt.Sprintf("%s/rssi",data.macAddr)
+        fmt.Println(topic)
+		token = mqttClient.Publish(topic,0,false,fmt.Sprintf("%d",data.rssi))
+		if token.Error() != nil {
+                log.Fatal(token.Error())
+        }
+
         }
 	}()
 	<-quit
@@ -165,6 +173,7 @@ func advHandler(a ble.Advertisement) {
 	var fract_part int
 	var light int
 	var sd ble.ServiceData
+	var rssi int
 
 	//fmt.Println("\n--------------------")
 	//fmt.Printf("%+X\n", a)
@@ -203,12 +212,17 @@ func advHandler(a ble.Advertisement) {
 				fmt.Printf("Light: %d\n", light)
 			}
 
+			//RSSI
+			rssi = a.RSSI()
+			fmt.Printf("RSSI: %d\n", rssi)
+
 			data:=sensorData{
 				fmt.Sprintf("%s",a.Addr()),
 				temperature,
 				humidity,
 				voltage,
 				light,
+				rssi,
 			}
 			cdata<-data
 		}
