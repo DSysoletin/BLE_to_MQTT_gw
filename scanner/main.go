@@ -9,17 +9,19 @@ import (
 	"crypto/tls"
 	"os"
 	"os/signal"
+	"math/rand"
 
 	"github.com/go-ble/ble"
 	"github.com/go-ble/ble/examples/lib/dev"
 	"github.com/pkg/errors"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
+
 )
 
 var (
 	//MQTT connection parameters
 	usessl = flag.Bool("ssl", false, "Use encrypted MQTT connection if true")
-	clientid = flag.String("clientid","golangIoTGW","MQTT Client ID")
+	clientid = flag.String("clientid","","MQTT Client ID")
 	pempath = flag.String("pempath","./cert.pem","Path to cert.pem file")
 	keypath = flag.String("keypath","./private.key","Path to private.key file")
 	mqtthost = flag.String("host","myawsioturl.iot.us-west-2.amazonaws.com","MQTT server hostname")
@@ -43,6 +45,12 @@ var cdata = make(chan sensorData)
  
 func mqttConnect(){
 	cid := *clientid
+	
+	if(cid==""){
+		log.Printf("Empty CID, generating a random one...\n")
+		cid = fmt.Sprintf("GolangBLEtoMQTT_%d",rand.Int())
+	}
+	fmt.Printf("Cliend ID:, %v\n",cid)
 	var connOpts MQTT.ClientOptions
 	var brokerURL string
 
@@ -92,7 +100,7 @@ func mqttConnect(){
 	go func() {
 		<-c
 		mqttClient.Disconnect(250)
-		fmt.Println("[MQTT] Disconnected")
+		log.Fatal("[MQTT] Disconnected")
 
 		quit <- struct{}{}
 	}()
@@ -107,34 +115,38 @@ func mqttConnect(){
 		token := mqttClient.Publish(topic,0,false,fmt.Sprintf("%f",data.temperature))
 		token.Wait();
 		if token.Error() != nil {
-                log.Fatal(token.Error())
+                log.Print(token.Error())
         }
 		topic=fmt.Sprintf("%s/humidity",data.macAddr)
 		fmt.Println(topic)
 		token = mqttClient.Publish(topic,0,false,fmt.Sprintf("%f",data.humidity))
+		token.Wait();
 		if token.Error() != nil {
-                log.Fatal(token.Error())
+                log.Print(token.Error())
         }
 
         topic=fmt.Sprintf("%s/voltage",data.macAddr)
         fmt.Println(topic)
 		token = mqttClient.Publish(topic,0,false,fmt.Sprintf("%d",data.voltage))
+		token.Wait();
 		if token.Error() != nil {
-                log.Fatal(token.Error())
+                log.Print(token.Error())
         }
 
         topic=fmt.Sprintf("%s/light",data.macAddr)
         fmt.Println(topic)
 		token = mqttClient.Publish(topic,0,false,fmt.Sprintf("%d",data.light))
+		token.Wait();
 		if token.Error() != nil {
-                log.Fatal(token.Error())
+                log.Print(token.Error())
         }
 
         topic=fmt.Sprintf("%s/rssi",data.macAddr)
         fmt.Println(topic)
 		token = mqttClient.Publish(topic,0,false,fmt.Sprintf("%d",data.rssi))
+		token.Wait();
 		if token.Error() != nil {
-                log.Fatal(token.Error())
+                log.Print(token.Error())
         }
 
         }
@@ -150,6 +162,8 @@ func check(err error) {
 
 func main() {
 	flag.Parse()
+	rand.Seed(time.Now().UnixNano())
+
 
 	go mqttConnect()
 
